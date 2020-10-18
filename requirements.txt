@@ -1,2 +1,8 @@
-fastapi==0.60.0
-uvicorn==0.11.5
+fastapi==0.61.1
+uvicorn==0.12.1
+starlette==0.13.8
+motor==2.3.0
+slugify==0.0.1
+databases
+python-dotenv
+
