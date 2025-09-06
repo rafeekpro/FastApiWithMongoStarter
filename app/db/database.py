@@ -25,13 +25,13 @@ async def connect_to_mongo() -> None:
             maxPoolSize=settings.MAX_CONNECTIONS_COUNT,
             minPoolSize=settings.MIN_CONNECTIONS_COUNT,
         )
-        
+
         # Verify connection
         await db.client.admin.command("ping")
-        
+
         db.database = db.client[settings.MONGO_DB]
         logger.info("Successfully connected to MongoDB!")
-        
+
     except Exception as e:
         logger.error(f"Failed to connect to MongoDB: {e}")
         raise

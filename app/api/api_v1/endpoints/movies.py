@@ -26,7 +26,7 @@ async def get_movies(
     """Get list of movies with optional filters."""
     filters = MovieFilters(title=title or None, limit=limit, offset=offset)
     movies, total_count = await service.get_movies(filters)
-    
+
     return MoviesResponse(movies=movies, moviesCount=total_count)
 
 

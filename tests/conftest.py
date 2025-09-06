@@ -23,17 +23,17 @@ async def test_db() -> AsyncGenerator:
     """Create a test database connection."""
     # Use a test database
     test_db_name = f"{settings.MONGO_DB}_test"
-    
+
     # Create test client
     client = AsyncIOMotorClient(settings.MONGODB_URL)
     test_database = client[test_db_name]
-    
+
     # Set the test database in the app
     db.client = client
     db.database = test_database
-    
+
     yield test_database
-    
+
     # Cleanup: Drop test database
     await client.drop_database(test_db_name)
     client.close()
@@ -49,20 +49,12 @@ async def client(test_db) -> AsyncGenerator:
 @pytest.fixture
 async def sample_movie_data():
     """Provide sample movie data for tests."""
-    return {
-        "name": "Test Movie",
-        "casts": ["Actor 1", "Actor 2"],
-        "genres": ["Action", "Drama"],
-        "year": 2024
-    }
+    return {"name": "Test Movie", "casts": ["Actor 1", "Actor 2"], "genres": ["Action", "Drama"], "year": 2024}
 
 
 @pytest.fixture
 async def created_movie(client: AsyncClient, sample_movie_data):
     """Create a movie and return it."""
-    response = await client.post(
-        f"{settings.API_V1_STR}/movies",
-        json=sample_movie_data
-    )
+    response = await client.post(f"{settings.API_V1_STR}/movies", json=sample_movie_data)
     assert response.status_code == 201
     return response.json()["movie"]

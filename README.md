@@ -1,19 +1,30 @@
 # FastAPI MongoDB Starter 🚀
 
+[![CI Pipeline](https://github.com/rafeekpro/FastApiWithMongoStarter/actions/workflows/ci.yml/badge.svg)](https://github.com/rafeekpro/FastApiWithMongoStarter/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/rafeekpro/FastApiWithMongoStarter/branch/master/graph/badge.svg)](https://codecov.io/gh/rafeekpro/FastApiWithMongoStarter)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115.5-009688.svg)](https://fastapi.tiangolo.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 Modern, production-ready FastAPI application with MongoDB integration, featuring clean architecture, comprehensive testing, and Docker support.
 
 ## Features ✨
 
-- **FastAPI** - Modern, fast web framework for building APIs
-- **MongoDB** - NoSQL database with Motor async driver
-- **Pydantic V2** - Data validation using Python type annotations
-- **Clean Architecture** - Repository pattern, service layer, dependency injection
-- **Docker Support** - Development and production Docker configurations
-- **Testing** - Comprehensive test suite with pytest
-- **Type Safety** - Full type hints with mypy validation
-- **Pre-commit Hooks** - Code quality enforcement
-- **Health Checks** - Ready and liveness probes
-- **CRUD Operations** - Complete Create, Read, Update, Delete functionality
+- **FastAPI** - Modern, fast web framework for building APIs with automatic OpenAPI documentation
+- **MongoDB** - NoSQL database with Motor async driver for high-performance data operations
+- **Pydantic V2** - Data validation using Python type annotations with automatic serialization
+- **Clean Architecture** - Repository pattern, service layer, and dependency injection for maintainable code
+- **Docker Support** - Multi-stage builds for production and docker-compose for development
+- **Testing** - Comprehensive test suite with pytest, unit and integration tests
+- **Type Safety** - Full type hints with mypy validation for better IDE support and fewer bugs
+- **Code Quality** - Black formatter, Ruff linter, and pre-commit hooks for consistent code style
+- **CI/CD** - GitHub Actions for automated testing, building, and deployment
+- **Security** - Security headers middleware, environment validation, and vulnerability scanning
+- **Health Checks** - Ready and liveness probes for Kubernetes deployments
+- **CRUD Operations** - Complete Create, Read, Update, Delete functionality with async support
+- **Error Handling** - Comprehensive exception handling with custom error responses
+- **Documentation** - Auto-generated API docs, contributing guide, and changelog
 
 ## Project Structure 📁
 
@@ -47,8 +58,8 @@ app/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/fastapi-mongodb-starter.git
-cd fastapi-mongodb-starter
+git clone https://github.com/rafeekpro/FastApiWithMongoStarter.git
+cd FastApiWithMongoStarter
 ```
 
 ### 2. Set up environment
@@ -181,7 +192,7 @@ pre-commit run --all-files
 
 ```bash
 # Build production image
-docker build -t fastapi-app .
+docker build -t fastapi-mongodb-app .
 
 # Run production container
 docker run -d \
@@ -189,8 +200,24 @@ docker run -d \
   -e MONGODB_URL="mongodb://user:pass@host:27017/db" \
   -e SECRET_KEY="your-production-secret-key" \
   --name fastapi-app \
-  fastapi-app
+  fastapi-mongodb-app
 ```
+
+### GitHub Actions CI/CD
+
+The project includes automated CI/CD pipelines:
+
+- **CI Pipeline** - Runs on every push and PR:
+  - Linting with Black and Ruff
+  - Type checking with mypy
+  - Unit and integration tests
+  - Security scanning
+  - Docker build test
+
+- **CD Pipeline** - Runs on release:
+  - Builds multi-platform Docker images
+  - Pushes to Docker Hub
+  - Optional deployment to cloud providers
 
 ### Environment Variables
 
@@ -234,13 +261,30 @@ Optional:
 - `year` - Regular index
 - `genres` - Regular index
 
+## Project Status 📈
+
+This project is actively maintained and production-ready. It follows best practices for:
+
+- ✅ Clean Architecture
+- ✅ Test-Driven Development
+- ✅ Continuous Integration/Deployment
+- ✅ Security Best Practices
+- ✅ Documentation Standards
+- ✅ Code Quality Standards
+
 ## Contributing 🤝
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+### Development Setup
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development setup instructions.
 
 ## License 📄
 

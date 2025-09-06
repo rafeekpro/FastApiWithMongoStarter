@@ -13,8 +13,6 @@ async def get_movie_repository() -> MovieRepository:
     return MovieRepository(db)
 
 
-async def get_movie_service(
-    repository: Annotated[MovieRepository, Depends(get_movie_repository)]
-) -> MovieService:
+async def get_movie_service(repository: Annotated[MovieRepository, Depends(get_movie_repository)]) -> MovieService:
     """Get movie service instance."""
     return MovieService(repository)

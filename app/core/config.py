@@ -24,9 +24,7 @@ if not MONGODB_URL:
     MONGO_PASS = os.getenv("MONGO_PASSWORD", "pass")
     MONGO_DB = os.getenv("MONGO_DB", "fastapi")
 
-    MONGODB_URL = DatabaseURL(
-        f"mongodb://{MONGO_USER}:{MONGO_PASS}@{MONGO_HOST}:{MONGO_PORT}/{MONGO_DB}"
-    )
+    MONGODB_URL = DatabaseURL(f"mongodb://{MONGO_USER}:{MONGO_PASS}@{MONGO_HOST}:{MONGO_PORT}/{MONGO_DB}")
 else:
     MONGODB_URL = DatabaseURL(MONGODB_URL)
 

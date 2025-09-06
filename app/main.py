@@ -7,6 +7,7 @@ from starlette.exceptions import HTTPException
 
 from app.api.api_v1.api import router as api_router
 from app.core.exceptions import http_error_handler, http_422_error_handler
+from app.core.security import setup_security_middleware
 from app.core.settings import settings
 from app.db.database import close_mongo_connection, connect_to_mongo
 
@@ -34,6 +35,9 @@ app = FastAPI(
     debug=settings.DEBUG,
     lifespan=lifespan,
 )
+
+# Configure security middleware
+setup_security_middleware(app)
 
 # Configure CORS
 app.add_middleware(
@@ -64,6 +68,7 @@ async def readiness_check():
     try:
         # Check database connection
         from app.db.database import db
+
         if db.client:
             await db.client.admin.command("ping")
             return {"status": "ready"}

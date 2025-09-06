@@ -7,9 +7,9 @@ from .mongodb import db
 
 async def connect_to_mongo():
     logging.info("Connecting to database...")
-    db.client = AsyncIOMotorClient(str(MONGODB_URL),
-                                   maxPoolSize=MAX_CONNECTIONS_COUNT,
-                                   minPoolSize=MIN_CONNECTIONS_COUNT)
+    db.client = AsyncIOMotorClient(
+        str(MONGODB_URL), maxPoolSize=MAX_CONNECTIONS_COUNT, minPoolSize=MIN_CONNECTIONS_COUNT
+    )
     logging.info("Database connected！")
 
 

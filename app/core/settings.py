@@ -16,11 +16,11 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = Field(default="FastAPI MongoDB Starter")
     API_V1_STR: str = Field(default="/api/v1")
     DEBUG: bool = Field(default=False)
-    
+
     # Security
     SECRET_KEY: str = Field(default_factory=lambda: secrets.token_urlsafe(32))
     ALLOWED_HOSTS: list[str] = Field(default=["*"])
-    
+
     # MongoDB
     MONGODB_URL: Optional[str] = Field(default=None)
     MONGO_HOST: str = Field(default="localhost")
@@ -28,21 +28,21 @@ class Settings(BaseSettings):
     MONGO_USER: str = Field(default="")
     MONGO_PASSWORD: str = Field(default="")
     MONGO_DB: str = Field(default="fastapi")
-    
+
     # Connection pool
     MAX_CONNECTIONS_COUNT: int = Field(default=10)
     MIN_CONNECTIONS_COUNT: int = Field(default=10)
-    
+
     # Collections
     MOVIE_COLLECTION: str = Field(default="movies")
-    
+
     @field_validator("ALLOWED_HOSTS", mode="before")
     @classmethod
     def parse_allowed_hosts(cls, v: Any) -> list[str]:
         if isinstance(v, str):
             return [host.strip() for host in v.split(",") if host.strip()]
         return v
-    
+
     @model_validator(mode="after")
     def build_mongodb_url(self) -> "Settings":
         if not self.MONGODB_URL:
@@ -52,11 +52,9 @@ class Settings(BaseSettings):
                     f"{self.MONGO_HOST}:{self.MONGO_PORT}/{self.MONGO_DB}"
                 )
             else:
-                self.MONGODB_URL = (
-                    f"mongodb://{self.MONGO_HOST}:{self.MONGO_PORT}/{self.MONGO_DB}"
-                )
+                self.MONGODB_URL = f"mongodb://{self.MONGO_HOST}:{self.MONGO_PORT}/{self.MONGO_DB}"
         return self
-    
+
     @field_validator("SECRET_KEY", mode="after")
     @classmethod
     def validate_secret_key(cls, v: str) -> str:

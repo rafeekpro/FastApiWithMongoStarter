@@ -14,33 +14,26 @@ from ....core.utils import create_aliased_response
 from ....crud.movie import (
     get_movies_with_filters,
 )
+
 # from ....crud.shortcuts import (
 #     get_scoreboard_or_404,
 # )
 from ....db.mongodb import AsyncIOMotorClient, get_database
-from ....models.movie import (
-    MovieFilterParams,
-    MovieInResponse,
-    ManyMoviesInResponse
-)
+from ....models.movie import MovieFilterParams, MovieInResponse, ManyMoviesInResponse
 
 router = APIRouter()
 
 
 @router.get("/movies", response_model=ManyMoviesInResponse, tags=["movies"])
 async def get_movies(
-        title: str = "",
-        limit: int = Query(20, gt=0),
-        offset: int = Query(0, ge=0),
-        # user: User = Depends(get_current_user_authorizer(required=False)),
-        db: AsyncIOMotorClient = Depends(get_database),
+    title: str = "",
+    limit: int = Query(20, gt=0),
+    offset: int = Query(0, ge=0),
+    # user: User = Depends(get_current_user_authorizer(required=False)),
+    db: AsyncIOMotorClient = Depends(get_database),
 ):
-    filters = MovieFilterParams(
-        title=title, limit=limit, offset=offset
-    )
-    dbmovies = await get_movies_with_filters(
-        db, filters
-    )
+    filters = MovieFilterParams(title=title, limit=limit, offset=offset)
+    dbmovies = await get_movies_with_filters(db, filters)
     return create_aliased_response(
         ManyMoviesInResponse(movies=dbmovies, movies_count=len(dbmovies))
         # ManyScoreboardsInResponse(scoreboards=dbscoreboards)

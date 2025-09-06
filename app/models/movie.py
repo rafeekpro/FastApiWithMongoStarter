@@ -6,6 +6,7 @@ from .dbmodel import DateTimeModelMixin, DBModelMixin
 from .rwmodel import RWModel
 from .classification import Classification
 
+
 class MovieFilterParams(RWModel):
     title: str = ""
     limit: int = 20

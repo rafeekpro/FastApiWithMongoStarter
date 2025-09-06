@@ -1,0 +1,80 @@
+name: CD Pipeline
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' || github.event_name == 'release'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ secrets.DOCKER_USERNAME }}/fastapi-mongodb-starter
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=raw,value=latest,enable={{is_default_branch}}
+    
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    
+    # Optional: Deploy to cloud provider
+    # Uncomment and configure based on your deployment target
+    
+    # - name: Deploy to AWS ECS
+    #   if: success()
+    #   run: |
+    #     # Add AWS ECS deployment commands here
+    #     echo "Deploying to AWS ECS..."
+    
+    # - name: Deploy to Google Cloud Run
+    #   if: success()
+    #   run: |
+    #     # Add GCP Cloud Run deployment commands here
+    #     echo "Deploying to Cloud Run..."
+    
+    # - name: Deploy to Azure Container Instances
+    #   if: success()
+    #   run: |
+    #     # Add Azure deployment commands here
+    #     echo "Deploying to Azure..."
+    
+    - name: Notify deployment status
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: 'Deployment ${{ job.status }} for version ${{ github.ref }}'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      continue-on-error: true

@@ -9,20 +9,15 @@ from ..db.mongodb import AsyncIOMotorClient
 from ..core.config import database_name, movie_collection
 
 
-async def get_movies_with_filters(
-    conn: AsyncIOMotorClient, filters: MovieFilterParams
-) -> List[MovieInDB]:
+async def get_movies_with_filters(conn: AsyncIOMotorClient, filters: MovieFilterParams) -> List[MovieInDB]:
     movies: List[MovieInDB] = []
     base_query = {}
 
     if filters.title:
-        title_list = filters.title.replace(", ", ",").split(',')
-        base_query["name"] = { "$in": title_list }
+        title_list = filters.title.replace(", ", ",").split(",")
+        base_query["name"] = {"$in": title_list}
 
-
-    rows = conn[database_name][movie_collection].find(base_query,
-                                                                limit=filters.limit,
-                                                                skip=filters.offset)
+    rows = conn[database_name][movie_collection].find(base_query, limit=filters.limit, skip=filters.offset)
     async for row in rows:
         # slug = row["slug"]
         # author = await get_profile_for_user(conn, row["author_id"], username)

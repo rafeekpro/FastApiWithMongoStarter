@@ -7,29 +7,34 @@ from starlette import status
 
 class AppException(HTTPException):
     """Base application exception."""
+
     pass
 
 
 class DatabaseException(AppException):
     """Database operation exception."""
+
     def __init__(self, detail: str = "Database operation failed"):
         super().__init__(status_code=500, detail=detail)
 
 
 class NotFoundException(AppException):
     """Resource not found exception."""
+
     def __init__(self, detail: str = "Resource not found"):
         super().__init__(status_code=404, detail=detail)
 
 
 class BadRequestException(AppException):
     """Bad request exception."""
+
     def __init__(self, detail: str = "Bad request"):
         super().__init__(status_code=400, detail=detail)
 
 
 class ValidationException(AppException):
     """Validation exception."""
+
     def __init__(self, detail: str = "Validation error", errors: Optional[Dict[str, Any]] = None):
         super().__init__(status_code=422, detail=detail)
         self.errors = errors

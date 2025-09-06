@@ -1,0 +1,153 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main ]
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install black ruff mypy
+        pip install -r requirements.txt
+    
+    - name: Format check with Black
+      run: black --check app tests
+    
+    - name: Lint with Ruff
+      run: ruff check app tests
+    
+    - name: Type check with mypy
+      run: mypy app --ignore-missing-imports
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:7.0
+        env:
+          MONGO_INITDB_ROOT_USERNAME: testuser
+          MONGO_INITDB_ROOT_PASSWORD: testpass
+          MONGO_INITDB_DATABASE: fastapi_test
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 27017:27017
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run tests with coverage
+      env:
+        MONGODB_URL: mongodb://testuser:testpass@localhost:27017/fastapi_test
+        SECRET_KEY: test-secret-key-for-ci-only
+      run: |
+        pytest tests/ -v --cov=app --cov-report=xml --cov-report=html --cov-report=term
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety
+    
+    - name: Security scan with Bandit
+      run: bandit -r app -ll
+    
+    - name: Check dependencies with Safety
+      run: safety check --json
+      continue-on-error: true
+
+  docker:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Docker image
+      run: |
+        docker build -t fastapi-mongodb-app:latest .
+    
+    - name: Run Docker container test
+      run: |
+        docker run -d --name test-container \
+          -e MONGODB_URL=mongodb://test:test@host.docker.internal:27017/test \
+          -e SECRET_KEY=test-key \
+          -p 8000:8000 \
+          fastapi-mongodb-app:latest
+        sleep 10
+        curl -f http://localhost:8000/health || exit 1
+        docker stop test-container
+        docker rm test-container
