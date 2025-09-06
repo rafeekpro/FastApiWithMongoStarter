@@ -1,8 +1,16 @@
-fastapi==0.61.1
-uvicorn==0.12.1
-starlette==0.13.8
-motor==2.3.0
-slugify==0.0.1
-databases
-python-dotenv
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+motor==3.6.0
+pydantic==2.10.3
+pydantic-settings==2.6.1
+python-dotenv==1.0.1
+python-slugify==8.0.4
+pymongo==4.10.1
+httpx==0.28.1
 
+# Development dependencies
+pytest==8.3.4
+pytest-asyncio==0.25.0
+pytest-cov==6.0.0
+ruff==0.8.4
+mypy==1.14.0

@@ -27,8 +27,8 @@ from ....models.movie import (
 router = APIRouter()
 
 
-@router.get("/movies", response_model=ManyMoviesInResponse, tags=["elements"])
-async def get_articles(
+@router.get("/movies", response_model=ManyMoviesInResponse, tags=["movies"])
+async def get_movies(
         title: str = "",
         limit: int = Query(20, gt=0),
         offset: int = Query(0, ge=0),
@@ -36,7 +36,7 @@ async def get_articles(
         db: AsyncIOMotorClient = Depends(get_database),
 ):
     filters = MovieFilterParams(
-        movie=title, limit=limit, offset=offset
+        title=title, limit=limit, offset=offset
     )
     dbmovies = await get_movies_with_filters(
         db, filters

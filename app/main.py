@@ -1,30 +1,72 @@
+import logging
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException
-from starlette.middleware.cors import CORSMiddleware
-from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
-from .api.api_v1.api import router as api_router
-from .core.config import ALLOWED_HOSTS, API_V1_STR, PROJECT_NAME
-from .core.errors import http_422_error_handler, http_error_handler
-from .db.mongodb_utils import close_mongo_connection, connect_to_mongo
+from app.api.api_v1.api import router as api_router
+from app.core.exceptions import http_error_handler, http_422_error_handler
+from app.core.settings import settings
+from app.db.database import close_mongo_connection, connect_to_mongo
 
-app = FastAPI(title=PROJECT_NAME)
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO if not settings.DEBUG else logging.DEBUG,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+logger = logging.getLogger(__name__)
 
-if not ALLOWED_HOSTS:
-    ALLOWED_HOSTS = ["*"]
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage application lifecycle."""
+    # Startup
+    await connect_to_mongo()
+    yield
+    # Shutdown
+    await close_mongo_connection()
+
+
+# Create FastAPI app
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    debug=settings.DEBUG,
+    lifespan=lifespan,
+)
+
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_HOSTS,
+    allow_origins=settings.ALLOWED_HOSTS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
-app.add_event_handler("startup", connect_to_mongo)
-app.add_event_handler("shutdown", close_mongo_connection)
-
+# Add exception handlers
 app.add_exception_handler(HTTPException, http_error_handler)
-app.add_exception_handler(HTTP_422_UNPROCESSABLE_ENTITY, http_422_error_handler)
+app.add_exception_handler(422, http_422_error_handler)
 
-app.include_router(api_router, prefix=API_V1_STR)
+# Include API router
+app.include_router(api_router, prefix=settings.API_V1_STR)
+
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint."""
+    return {"status": "healthy"}
+
+
+@app.get("/ready")
+async def readiness_check():
+    """Readiness check endpoint."""
+    try:
+        # Check database connection
+        from app.db.database import db
+        if db.client:
+            await db.client.admin.command("ping")
+            return {"status": "ready"}
+        return {"status": "not ready", "reason": "database not connected"}
+    except Exception as e:
+        return {"status": "not ready", "reason": str(e)}

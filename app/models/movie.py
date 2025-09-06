@@ -1,7 +1,7 @@
 from typing import List
 from datetime import datetime
 
-from pydantic import Schema
+from pydantic import Field
 from .dbmodel import DateTimeModelMixin, DBModelMixin
 from .rwmodel import RWModel
 from .classification import Classification
@@ -15,7 +15,7 @@ class MovieFilterParams(RWModel):
 class MovieBase(RWModel):
     name: str = ""
     casts: List[str] = []
-    geners: List[str] = []
+    genres: List[str] = []
     year: int = 0
 
 
@@ -37,4 +37,4 @@ class MovieInResponse(RWModel):
 
 class ManyMoviesInResponse(RWModel):
     movies: List[Movie]
-    movies_count: int = Schema(..., alias="moviesCount")
+    movies_count: int = Field(..., alias="moviesCount")

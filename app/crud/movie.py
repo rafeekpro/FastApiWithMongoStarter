@@ -1,7 +1,5 @@
-from typing import List, Optional
+from typing import List
 from bson import ObjectId
-from slugify import slugify
-from datetime import datetime
 
 from ..models.movie import (
     MovieFilterParams,
@@ -18,8 +16,8 @@ async def get_movies_with_filters(
     base_query = {}
 
     if filters.title:
-        movies = filters.title.replace(", ", ",").split(',')
-        base_query["Movie"] = { "$in": movies }
+        title_list = filters.title.replace(", ", ",").split(',')
+        base_query["name"] = { "$in": title_list }
 
 
     rows = conn[database_name][movie_collection].find(base_query,
